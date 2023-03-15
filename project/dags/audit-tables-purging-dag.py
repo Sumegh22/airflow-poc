@@ -12,17 +12,17 @@ logger = logging.getLogger(__name__)
 args = {"owner": "Airflow", "start_date": datetime(2021,3,1)}
 
 dag = DAG(
-    dag_id="audit-table-query", default_args=args, schedule_interval=None
+    dag_id="audit-table-puring-dag", default_args=args, schedule_interval=None
 )
 
-query = ["""call UPSERT_TO_PURGE_RUNTIME_AUDIT();"""
-]
+query = ["""select count(*) from RDA_T1_DEV.public.RUNTIME_AUDIT""",
+        ]
 
 
-def count1(**context):
+def count(**context):
     dwh_hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
-    result = dwh_hook.get_first("call UPSERT_TO_PURGE_RUNTIME_AUDIT();")
-    logging.info("Data in the audit staging table", result)
+    result = dwh_hook.get_first("select count(*) from RDA_T1_DEV.public.RUNTIME_AUDIT")
+    logging.info("Number of rows in `RDA_T1_DEV.public.RUNTIME_AUDIT`  - %s", result[0])
 
 
 with dag:
@@ -32,5 +32,5 @@ with dag:
         snowflake_conn_id="snowflake_conn",
     )
 
-    count_query = PythonOperator(task_id="count_query", python_callable=count1)
+    count_query = PythonOperator(task_id="count_query", python_callable=count)
 query_exec >> count_query
