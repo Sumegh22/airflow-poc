@@ -27,7 +27,7 @@ with DAG('snow-flake-query-dag', default_args=default_args, schedule_interval=No
 
     run_stored_proc = SnowflakeOperator(
         task_id='run_stored_proc',
-        snowflake_conn_id='snowflake_default',
+        snowflake_conn_id='snowflake_conn',
         sql='CALL UPSERT_TO_PURGE_RUNTIME_AUDIT_STAGING();',
         autocommit=True
     )
