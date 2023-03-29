@@ -23,7 +23,7 @@ default_args = {
 }
 
 
-with DAG('snow-flake-query-dag', default_args=default_args, schedule_interval=None) as dag:
+with DAG('snowflake-operator-dag', default_args=default_args, schedule_interval=None) as dag:
 
     run_stored_proc = SnowflakeOperator(
         task_id='run_stored_proc',

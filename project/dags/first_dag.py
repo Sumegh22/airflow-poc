@@ -42,7 +42,7 @@ with DAG(
         task_id="first_function_execute",
         python_callable=first_function_execute,
         provide_context=True,
-        op_kwargs={"name":"Soumil Shah"}
+        op_kwargs={"name":"sumegh tembhurne"}
     )
 
     second_function_execute = PythonOperator(

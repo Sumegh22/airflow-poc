@@ -1,7 +1,7 @@
 import logging
 from airflow import DAG
-from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from datetime import datetime, timedelta
 from airflow.utils.decorators import apply_defaults
@@ -16,29 +16,13 @@ from airflow.exceptions import AirflowException
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@apply_defaults
-def __init__(
-        self,
-        *,
-        application_name: str,
-        attach_log: bool = False,
-        namespace: Optional[str] = None,
-        snowflake_conn_id: str ="snowflake_default",
-        api_group: str = 'batch',
-        api_version: str = 'v1',
-        **kwargs,
-) -> None:
-    super().__init__(**kwargs)
-    self.application_name = 'audit-tables-purging-dag'
-    self.attach_log = attach_log
-    self.namespace = namespace
-    self.snowflake_conn_id = snowflake_conn_id
-    self.hook = SnowflakeHook(snowflake_conn_id='snowflake_default')
-    self.api_group = api_group
-    self.api_version = api_version
+def __init__(self, name=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = 'audit-tables-purging-dag'
+
 
 default_args = {
-    'owner': 'airflow',
+    'owner': 'snowflake-audit-deployer',
     'start_date': datetime(2023,1,1),
     'depends_on_past': False,
     'catchup': False,
@@ -51,22 +35,17 @@ default_args = {
     'datastore_secret_name': 'aia-datastore-db-secret',
     'application_name':'audit-tables-purging-dag'
 }
-
-
-dag = DAG(
-    'audit-tables-purging-dag',
-    default_args=default_args,
-    description='Query Snowflake using Snowflake hook',
-    schedule_interval=None
-)
-
 def execute_snowflake_procedure():
     hook = SnowflakeHook(snowflake_conn_id='snowflake_default')
     result = hook.get_first("CALL UPSERT_TO_PURGE_RUNTIME_AUDIT_STAGING();")
     print(f"Result of the query: {result[0]}")
 
-with dag:
-    query_task = PythonOperator(
-        task_id='execute_snowflake_procedure',
-        python_callable=execute_snowflake_procedure
-    )
+t0 = PythonOperator(
+    task_id="snowflake-hook-dag",
+    python_callable=execute_snowflake_procedure,
+    op_kwargs={"my_param": 'executing-procedure-on-snowflake'},
+    provide_context=True,
+    do_xcom_push=True
+)
+
+t0
