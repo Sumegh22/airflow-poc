@@ -36,7 +36,7 @@ def execute_snowflake_procedure():
     print(f"Result of the query: {result[0]}")
 
 t0 = PythonOperator(
-    task_id="snowflake-hook-dag",
+    task_id="select-query-dag",
     python_callable=execute_snowflake_procedure,
     op_kwargs={"my_param": 'executing-procedure-on-snowflake'},
     provide_context=True,

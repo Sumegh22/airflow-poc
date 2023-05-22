@@ -18,7 +18,7 @@ def first_function_execute(**context):
 
 def second_function_execute(**context):
     instance = context.get("ti").xcom_pull(key="mykey")
-    data = [{"name":"Soumil","title":"Full Stack Software Engineer"}, { "name":"Nitin","title":"Full Stack Software Engineer"},]
+    data = [{"name":"Sumegh","title":"Full Stack Software Engineer"}, { "name":"Sumegh","title":"Full Stack Software Engineer"},]
     df = pd.DataFrame(data=data)
     print('@'*66)
     print(df.head())
