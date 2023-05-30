@@ -57,20 +57,16 @@ def execute_snowflake_procedure(**kwargs):
         epoch = calendar.timegm(retain_till.timetuple())
         print(f"Conversion of retention period in AUDIT_TIME for snowflake table", epoch)
         hook = SnowflakeHook(snowflake_conn_id='snowflake_default')
-        try:
-            result = hook.get_first("call UPSERT_TO_PURGE_RUNTIME_AUDIT(epoch);")
-            print(f"fetching result from snowflake : ")
-            for row in result:
-                    print(row)
-                    if 'error' in row:
-                        raise AirflowException(f'received "error" while executing procedure on your db at snowflake warehouse! Failing the DAG.')
 
-        except Exception as e:
-            print(f"Unknown Exception: {str(e)}")
-            raise e
+        result = hook.get_first("call UPSERT_TO_PURGE_RUNTIME_AUDIT('$epoch');")
+        print(f"fetching result from snowflake : ")
+        for row in result:
+                print(row)
+                if 'error' in row:
+                    raise AirflowException(f'received "error" while executing procedure on your db at snowflake warehouse! Failing the DAG.')
 
-    except AirflowException as e:
-        print(f"Airflow Exception: {str(e)}")
+    except Exception as e:
+        print(f"Unknown Exception: {str(e)}")
         raise e
 
 t1 = PythonOperator(
